@@ -1,14 +1,34 @@
 var express = require('express');
 var router = express.Router();
 
+var MongoClient = require('mongodb').MongoClient;
+var ObjectId = require('mongodb').ObjectId;
+// Connection URL 
+var url = 'mongodb://localhost:27017/game_server';
+var dbObj = null;
+// Use connect method to connect to the Server 
+MongoClient.connect(url, function(err, db) {
+  console.log("Connected correctly to server");
+  dbObj = db;
+  //db.close();
+});
+
 var mysql      = require('mysql');
-var connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'root',
-  password : 'test1234',
-  database : 'game_server'
-}); 
-connection.connect();
+var connection = mysql.createPool({
+  connectionLimit : 10,
+  host            : 'localhost',
+  user            : 'root',
+  password        : 'test1234',
+  database        : 'game_server'
+});
+//connection.connect();
+
+router.getMySQL = function() {
+	return connection;
+};
+router.getMongoDB = function() {
+	return dbObj;
+};
 
 //버전 정보 등록
 router.post('/', function(req, res, next) {
