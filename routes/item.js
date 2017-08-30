@@ -1,6 +1,11 @@
 var express = require('express');
 var router = express.Router();
 
+var getMySQL = require('./version.js').getMySQL;
+var getMongoDB = require('./version.js').getMongoDB;
+var connection = getMySQL();
+var dbObj = getMongoDB();
+
 //아이템 생성
 router.post('/', function(req, res, next) {
 	res.send(JSON.stringify({}));
