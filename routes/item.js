@@ -142,22 +142,63 @@ router.get('/ranking', function(req, res, next) {
 
 //아이템 구입 회윈 목록 조회
 router.get('/users', function(req, res, next) {
-	res.send(JSON.stringify({}));
+	var item_id = Number(req.query.item_id);
+	var limit = Number(req.query.count);
+	var skip = limit * (Number(req.query.page)-1);
+	if (skip < 0) skip = 0;
+	var sort = {_id:1};
+	if (req.query.sort == 'desc') sort = {_id:-1};
+	var dbObj = getMongoDB();
+	var collection = dbObj.collection('item_buy_user');
+	collection.find({item_id:item_id}).limit(limit).skip(skip).sort(sort).toArray(function(err, results) {
+		if (err) res.send(JSON.stringify({result:false,error:err}));
+	  	else res.send(JSON.stringify({result:true,item_buy_users:results}));
+	});
 });
 
 //아이템 좋아요 등록
 router.post('/like', function(req, res, next) {
-	res.send(JSON.stringify({}));
+	var item_id = Number(req.body.item_id);
+	var user_id = Number(req.body.user_id);
+	var dbObj = getMongoDB();
+	var collection = dbObj.collection('item_like');
+	collection.remove({item_id:item_id,user_id:user_id}, function(err, result) {
+		if (err) res.send(JSON.stringify({result:false,error:err}));
+	  	else {
+	  		collection.save({item_id:item_id,user_id:user_id}, function(err, result) {
+	  			if (err) res.send(JSON.stringify({result:false,error:err}));
+	  			else res.send(JSON.stringify({result:true,message:result}));
+	  		});
+	  	}
+	});
 });
 
 //아이템 좋아요 삭제
 router.delete('/like', function(req, res, next) {
-	res.send(JSON.stringify({}));
+	var item_id = Number(req.body.item_id);
+	var user_id = Number(req.body.user_id);
+	var dbObj = getMongoDB();
+	var collection = dbObj.collection('item_like');
+	collection.remove({item_id:item_id,user_id:user_id}, function(err, result) {
+		if (err) res.send(JSON.stringify({result:false,error:err}));
+	  	else res.send(JSON.stringify({result:true,message:result}));
+	});
 });
 
 //아이템 좋아요 사용자 목록 조회
 router.get('/like/users', function(req, res, next) {
-	res.send(JSON.stringify({}));
+	var item_id = Number(req.query.item_id);
+	var limit = Number(req.query.count);
+	var skip = limit * (Number(req.query.page)-1);
+	if (skip < 0) skip = 0;
+	var sort = {_id:1};
+	if (req.query.sort == 'desc') sort = {_id:-1};
+	var dbObj = getMongoDB();
+	var collection = dbObj.collection('item_like');
+	collection.find({item_id:item_id}).limit(limit).skip(skip).sort(sort).toArray(function(err, results) {
+		if (err) res.send(JSON.stringify({result:false,error:err}));
+	  	else res.send(JSON.stringify({result:true,item_like_users:results}));
+	});
 });
 
 module.exports = router;
