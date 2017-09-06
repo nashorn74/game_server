@@ -137,7 +137,16 @@ router.get('/list', function(req, res, next) {
 
 //아이템 판매 순위 조회
 router.get('/ranking', function(req, res, next) {
-	res.send(JSON.stringify({}));
+	var dbObj = getMongoDB();
+	var collection = dbObj.collection('item_buy_user');
+	collection.aggregate(
+        [
+          { $group: { _id: "$item_id" , buy_count: { $sum: 1 } } },
+          { $sort: { buy_count: -1 } } 
+        ]).toArray(function(err, results) {
+		if (err) res.send(JSON.stringify(err));
+		else res.send(JSON.stringify(results));
+	});
 });
 
 //아이템 구입 회윈 목록 조회
