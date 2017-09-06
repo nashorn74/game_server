@@ -1,19 +1,72 @@
 var express = require('express');
 var router = express.Router();
 
+var crypto = require('crypto');
+var jwt = require('jsonwebtoken');
+var tokenKey = "GAME_SERVER12345"; //토큰키
+
+var getMySQL = require('./version.js').getMySQL;
+var getMongoDB = require('./version.js').getMongoDB;
+var connection = getMySQL();
+var dbObj = getMongoDB();
+
 //회원 가입
 router.post('/', function(req, res, next) {
-	res.send(JSON.stringify({}));
+	var hash = crypto.createHash('sha256').update(req.body.password).digest('base64');
+	var query = 'insert into user(name,email,password) values(?,?,?);';
+	connection.query(query, [ req.body.name, req.body.email, hash ], 
+		function (error, result) {
+	  if (error) res.send(JSON.stringify({result:false,error:error}));
+	  else res.send(JSON.stringify({result:true,message:result}));
+	});
 });
 
 //회원 로그인
 router.post('/login', function(req, res, next) {
-	res.send(JSON.stringify({}));
+	var hash = crypto.createHash('sha256').update(req.body.password).digest('base64');
+	connection.query('select * from user where email=? and password=?', 
+		[ req.body.email, hash ], function (error, results, fields) {
+	  if (error) res.send(JSON.stringify({result:false, error:error}));
+	  else {
+	  	if (results.length > 0) {
+	  		var payLoad  = {'user_id':results[0].id};
+			var token = jwt.sign(payLoad,tokenKey,{
+			    algorithm : 'HS256', //"HS256", "HS384", "HS512", "RS256", "RS384", "RS512" default SHA256
+			    expiresIn : 1440 //expires in 24 hours
+			});
+			console.log("token : ", token);
+			//decode 비동기처리
+			/*jwt.verify(token,tokenKey,function(err,decoded){
+				if (err) res.send(JSON.stringify({result:false, error:err}));
+			    else res.send(JSON.stringify({token:token,decoded:decoded}));
+			});*/
+			connection.query('delete from user_login where user_id=?', 
+				[results[0].id], function(err2, result2) {
+				if (err2) res.send(JSON.stringify({result:false, error:err2}));
+				else {
+					connection.query('insert into user_login(user_id, token) values(?,?)', 
+	  					[results[0].id, token], function(err, result) {
+	  					if (err) res.send(JSON.stringify({result:false, error:err}));
+	  					else res.send(JSON.stringify({result:true,token:token,message:result}));
+	  				});
+				}
+			});
+	  	} else {
+	  		res.send(JSON.stringify({result:false, error:{message:'do not exists or wrong password'}}));
+	  	}
+	  }
+	});
 });
 
 //회원 로그아웃
 router.post('/logout', function(req, res, next) {
-	res.send(JSON.stringify({}));
+	connection.query('delete from user_login where token=?', 
+		[req.body.token], function(err, result) {
+		if (err) res.send(JSON.stringify({result:false, error:err}));
+		else {
+			res.send(JSON.stringify({result:true,message:result}))
+		}
+	});
 });
 
 //회원 정보 조회
