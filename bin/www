@@ -21,6 +21,33 @@ app.set('port', port);
 
 var server = http.createServer(app);
 
+var mqtt = require('mqtt')
+var client  = mqtt.connect('mqtt://127.0.0.1')
+ 
+client.on('connect', function () {
+  client.subscribe('game_server');
+})
+ 
+var io = require('socket.io')(server);
+io.on('connection', function(socket){
+  console.log('connection');
+
+  socket.on('publish_message', function(data) {
+    var message = JSON.parse(data);
+    client.publish('game_server', message.message);
+  });
+
+  client.on('message', function (topic, message) {
+    // message is Buffer
+    console.log(message.toString());
+    socket.emit('subscribe_message',JSON.stringify({result:true,message:message.toString()}));
+  })
+
+  socket.on('disconnect', function(){
+
+  });
+});
+
 /**
  * Listen on provided port, on all network interfaces.
  */
