@@ -22,11 +22,8 @@ var card_data = {
 router.post('/test/card', function(req, res, next) {
 	paypal.creditCard.create(card_data, function(error, credit_card){
 		if (error) {
-			console.log(error);
 			res.send(JSON.stringify(error));
 		} else {
-			console.log("Create Credit-Card Response");
-			console.log(credit_card);
 			res.send(JSON.stringify(credit_card));
 		}
 	})
