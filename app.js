@@ -12,6 +12,7 @@ var user = require('./routes/user');
 var item = require('./routes/item');
 var notice = require('./routes/notice');
 var version = require('./routes/version');
+var paypal = require('./routes/paypal');
 
 var app = express();
 
@@ -34,6 +35,7 @@ app.use('/user', user);
 app.use('/item', item);
 app.use('/notice', notice);
 app.use('/version', version);
+app.use('/paypal', paypal);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
