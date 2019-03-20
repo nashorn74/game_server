@@ -99,3 +99,9 @@ insert into version(os, major, minor, build) values('Android', 0, 0, 1);
 insert into version(os, major, minor, build) values('Android', 0, 0, 2);
 insert into version(os, major, minor, build) values('iOS', 0, 1, 0);
 insert into version(os, major, minor, build) values('iOS', 0, 1, 2);
+
+create table word_count (
+	id integer primary key auto_increment,
+	key text not null,
+	value integer not null default 0,
+) default charset=utf8;
