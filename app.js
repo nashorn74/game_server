@@ -13,6 +13,7 @@ var item = require('./routes/item');
 var notice = require('./routes/notice');
 var version = require('./routes/version');
 var paypal = require('./routes/paypal');
+var analyzation = require('./routes/analyzation');
 
 var app = express();
 
@@ -36,6 +37,7 @@ app.use('/item', item);
 app.use('/notice', notice);
 app.use('/version', version);
 app.use('/paypal', paypal);
+app.use('/analyzation', analyzation);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
